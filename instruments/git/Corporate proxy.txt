@@ -1,0 +1,2 @@
+git config --global http.proxy http://USERNAME:PASSWOERD@SERVER:PORT
+git config --global https.proxy http://USERNAME:PASSWOERD@SERVER:PORT

@@ -1,0 +1,51 @@
+WITH SourceData AS
+(
+    SELECT
+        value AS ID, -- 1. The column containing the sequence
+        RowNum = ROW_NUMBER() OVER (ORDER BY value) 
+    FROM
+        test (nolock)-- 2. The table containing the column
+),
+Ranked AS
+(
+    SELECT
+        *,
+        DENSE_RANK() OVER (ORDER BY ID - RowNum) As Series 
+    FROM SourceData
+),
+Counted AS
+(
+    SELECT
+        *,
+        COUNT(*) OVER (PARTITION BY Series) AS SCount
+    FROM Ranked
+),
+Gaps AS
+(
+    SELECT
+        MinID = MIN(ID), 
+        MaxID = MAX(ID), 
+        Series
+    FROM
+        Counted
+    GROUP BY Series
+)
+
+SELECT
+    FirstNumberInGap = (a.MaxID + 1),
+    LastNumberInGap = (b.MinID - 1)
+FROM
+    Gaps a
+INNER JOIN
+    Gaps b ON a.Series + 1 = b.Series
+ORDER BY
+    FirstNumberInGap
+
+
+--########################SLOW####################
+select t1.value+1 as start, MIN(t3.value)-1 as stop
+from test as t1
+left join test as t2 on t1.value=t2.value-1
+left join test as t3 on t1.value<t3.value
+where t2.value is null and t3.value is not null
+group by t1.value, t2.value

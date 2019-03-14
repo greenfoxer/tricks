@@ -1,0 +1,7 @@
+select Min(seriesnumber),MAX(seriesnumber)
+from(
+	select t.seriesnumber, t.SeriesNumber-ROW_NUMBER() over(order by t.seriesnumber) as grp
+	from dbMarkerStamp_0FSRAR.dbo.tStamp_02000 t 
+	--where  t.SeriesNumber between 20000000001 and 20000000015
+	) p
+group by grp
