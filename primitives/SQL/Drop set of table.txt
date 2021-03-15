@@ -1,0 +1,11 @@
+DECLARE @dbs NVARCHAR(MAX)
+SELECT @dbs = STUFF(
+                    (   select ',' +
+							            name from master.sys.databases where name like 'tesse%'
+                        FOR xml path('')
+                    )
+                    , 1
+                    , 1
+                    , '')
+DECLARE @dropquery NVARCHAR(max) = 'drop database ' + @dbs
+exec(@dropquery)
